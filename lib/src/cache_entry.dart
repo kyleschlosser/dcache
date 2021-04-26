@@ -7,6 +7,7 @@ class CacheEntry<K, V> {
   bool updating = false;
   DateTime lastUse = DateTime.now();
   int use = 0;
+  Future<V>? future;
 
   CacheEntry(this.key, this.value, this.insertTime) {
     lastUse = insertTime;

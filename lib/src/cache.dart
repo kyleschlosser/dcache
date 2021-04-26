@@ -54,6 +54,19 @@ abstract class Cache<K, V> {
     return entry?.value;
   }
 
+  FutureOr<V?> getFutureOr(K key) async {
+    V? value = get(key);
+    if (value == null && _get(key) != null){
+      var internal = _get(key)!;
+      if(internal.updating){
+        await internal.future;
+      }
+    }
+
+    value = get(key);
+    return value;
+  }
+
   // Load a new value and insert in the cache
   void _loadValue(CacheEntry<K, V> entry) {
     if (_loaderFunc != null && !entry.updating) {
@@ -84,6 +97,7 @@ abstract class Cache<K, V> {
     if (element is Future<V>) {
       entry = CacheEntry<K, V>(key, null, DateTime.now());
       entry.updating = true;
+      entry.future = element;
       element.then((e) {
         entry.updating = false;
         entry.value = e;
